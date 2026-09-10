@@ -20,11 +20,13 @@ public:
      * @return A function that will be triggered each frame
      */
     virtual std::function<void(AppLoopData*)> registerUpdateFunc() = 0;
+    virtual std::function<void(AppLoopData*)> registerDrawFunc() = 0;
 
     /**
      * @brief closes all needed connected running systems
      */
     virtual void stop() = 0;
+
 };
 
 #endif //COLLISIONCRISISHERKANSING_GAMESYSTEM_H

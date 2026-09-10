@@ -16,7 +16,8 @@ class Application {
 private:
     sf::RenderWindow* window = nullptr;
     AppLoopData* appLoopData = nullptr;
-    std::vector<std::function<void(AppLoopData*)>> registeredSystems;
+    std::vector<std::function<void(AppLoopData*)>> registeredUpdateSystems;
+    std::vector<std::function<void(AppLoopData*)>> registeredDrawSystems;
     sf::Clock* clock = nullptr;
 
 public:
@@ -24,7 +25,7 @@ public:
     void triggerAppLoop() const;
     void registerSystem(GameSystem* sys);
 
-    sf::RenderWindow* getWindow() const;
+    [[nodiscard]] sf::RenderWindow* getWindow() const;
 };
 
 #endif //COLLISIONCRISISHERKANSING_SYSTEM_H

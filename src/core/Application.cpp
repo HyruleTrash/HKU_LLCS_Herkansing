@@ -13,7 +13,7 @@ void Application::init() {
     this->appLoopData = new AppLoopData(window, 0);
     this->clock = new sf::Clock();
 
-    std::cout << "Initializing main application, \nCreating: \nwindow, \nLoopdata, \nand program clock.\n";
+    std::cout << "Initializing main application, \nCreating: \nwindow, \nLoopdata, \nand program clock.\n\n";
 }
 
 /**
@@ -31,7 +31,8 @@ void Application::triggerAppLoop() const {
             if ( event->is<sf::Event::Closed>() ) window->close();
 
         window->clear();
-        for (const auto& func: registeredSystems) func(this->appLoopData);
+        for (const auto& func: registeredUpdateSystems) func(this->appLoopData);
+        for (const auto& func: registeredDrawSystems) func(this->appLoopData);
         window->display();
     }
 }
@@ -41,7 +42,8 @@ void Application::triggerAppLoop() const {
  * @param sys, game system, to add to update/app loop
  */
 void Application::registerSystem(GameSystem *sys) {
-    registeredSystems.push_back(sys->registerUpdateFunc());
+    registeredUpdateSystems.push_back(sys->registerUpdateFunc());
+    registeredDrawSystems.push_back(sys->registerDrawFunc());
 }
 
 sf::RenderWindow* Application::getWindow() const {

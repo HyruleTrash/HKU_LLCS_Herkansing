@@ -25,11 +25,12 @@ private:
 public:
     Game();
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
+    std::function<void(AppLoopData*)> registerDrawFunc() override;
     void stop() override;
 
     void update(AppLoopData* data);
     void physicsUpdate(const sf::Vector2u& windowSize, float deltaTime);
-    void draw(sf::RenderWindow& window) const;
+    void draw(AppLoopData *data) const;
 };
 
 

@@ -15,9 +15,11 @@ private:
 public:
     Profiler(sf::RenderWindow &window);
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
+    std::function<void(AppLoopData*)> registerDrawFunc() override;
     void stop() override;
 
     void update(AppLoopData* data);
+    void draw(AppLoopData* data);
 
     bool running;
 };

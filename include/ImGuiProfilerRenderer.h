@@ -11,6 +11,11 @@
 #include <sstream>
 #include <vector>
 
+/*
+ * Original code belongs to https://github.com/Raikiri/LegitProfiler/blob/master/ImGuiProfilerRenderer.h
+ * Which was copied under MIT license, and edited/developed further for use case by me, Lucas Hoogerbrugge
+ */
+
 namespace ImGuiUtils
 {
   inline glm::vec2 Vec2(ImVec2 vec)
@@ -364,15 +369,12 @@ namespace ImGuiUtils
       std::stringstream title;
       title.precision(2);
       title << std::fixed << "Legit profiler [" << 1.0f / avgFrameTime << "fps\t" << " cpu: " << cpuGraph.GetTotalTaskTime(frameOffset) * 1000.0f << "ms gpu: " << gpuGraph.GetTotalTaskTime(frameOffset) * 1000.0f << "ms]###ProfilerWindow";
+
+      ImGui::SetNextWindowSize(ImVec2(600.0f, 400.0f), ImGuiCond_FirstUseEver);
+      ImGui::SetNextWindowSizeConstraints(ImVec2(400.0f, 250.0f), ImVec2(FLT_MAX, FLT_MAX));
+
       //###AnimatedTitle
       ImGui::Begin(title.str().c_str(), 0, ImGuiWindowFlags_NoScrollbar);
-      /*if (ImGui::BeginMenuBar())
-      {
-        if (ImGui::BeginMenu("Menu"))
-        {
-        }
-      }
-      ImGui::EndMenuBar();*/
       ImVec2 canvasSize = ImGui::GetContentRegionAvail();
 
       int sizeMargin = int(ImGui::GetStyle().ItemSpacing.y);

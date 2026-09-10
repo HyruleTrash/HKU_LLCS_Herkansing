@@ -32,13 +32,17 @@ std::function<void(AppLoopData*)> Game::registerUpdateFunc() {
     return std::bind(&Game::update, this, std::placeholders::_1);
 }
 
+std::function<void(AppLoopData *)> Game::registerDrawFunc() {
+    std::cout << "Registering main game draw call to app.\n";
+    return std::bind(&Game::draw, this, std::placeholders::_1);
+}
+
 void Game::stop() {
     // nothing to remove
 }
 
 void Game::update(AppLoopData *data) {
     this->physicsUpdate(data->window->getSize(), data->deltaTime);
-    this->draw(*data->window);
 }
 
 void Game::physicsUpdate(const sf::Vector2u &windowSize, float deltaTime) {
@@ -119,6 +123,6 @@ void Game::physicsUpdate(const sf::Vector2u &windowSize, float deltaTime) {
     }
 }
 
-void Game::draw(sf::RenderWindow &window) const {
-    for (const auto& ball : balls) window.draw(ball.shape);
+void Game::draw(AppLoopData *data) const {
+    for (const auto& ball : balls) data->window->draw(ball.shape);
 }
