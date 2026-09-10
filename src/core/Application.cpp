@@ -43,3 +43,7 @@ void Application::triggerAppLoop() const {
 void Application::registerSystem(GameSystem *sys) {
     registeredSystems.push_back(sys->registerUpdateFunc());
 }
+
+sf::RenderWindow* Application::getWindow() const {
+    return this->window;
+}

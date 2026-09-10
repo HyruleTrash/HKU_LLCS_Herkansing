@@ -32,6 +32,10 @@ std::function<void(AppLoopData*)> Game::registerUpdateFunc() {
     return std::bind(&Game::update, this, std::placeholders::_1);
 }
 
+void Game::stop() {
+    // nothing to remove
+}
+
 void Game::update(AppLoopData *data) {
     this->physicsUpdate(data->window->getSize(), data->deltaTime);
     this->draw(*data->window);

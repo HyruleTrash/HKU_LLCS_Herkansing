@@ -12,19 +12,20 @@
 
 struct Ball;
 
-class Game: public GameSystem{
+class Game : public GameSystem{
 private:
     std::vector<Ball> balls;
     std::random_device rd;
     std::mt19937 gen;
     std::uniform_real_distribution<float> posDist;
     std::uniform_real_distribution<float> velDist;
-    std::uniform_int_distribution<int> colorDist;
+    std::uniform_int_distribution<> colorDist;
     std::uniform_real_distribution<float> radiusDist;
 
 public:
     Game();
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
+    void stop() override;
 
     void update(AppLoopData* data);
     void physicsUpdate(const sf::Vector2u& windowSize, float deltaTime);

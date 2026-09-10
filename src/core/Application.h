@@ -23,6 +23,8 @@ public:
     void init();
     void triggerAppLoop() const;
     void registerSystem(GameSystem* sys);
+
+    sf::RenderWindow* getWindow() const;
 };
 
 #endif //COLLISIONCRISISHERKANSING_SYSTEM_H
