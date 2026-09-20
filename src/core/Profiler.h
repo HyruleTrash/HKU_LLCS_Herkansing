@@ -13,7 +13,7 @@ private:
     std::vector<legit::ProfilerTask> cpuTasks;
 
 public:
-    Profiler(sf::RenderWindow &window);
+    Profiler(sf::RenderWindow& window);
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
     std::function<void(AppLoopData*)> registerDrawFunc() override;
     void stop() override;
