@@ -17,12 +17,11 @@ public:
 
 class SpatialHash {
 public:
-    std::vector<Bucket*> buckets;
+    std::vector<Bucket> buckets;
     std::vector<Bucket*> edgeBuckets;
     std::tuple<int, int> size;
 
     SpatialHash(const std::tuple<int, int>& size);
-    ~SpatialHash();
     void moveBallIntoBucket(Ball* ball, const sf::Vector2u& windowSize);
     Bucket* findBucket(const std::tuple<int, int>& hash);
 

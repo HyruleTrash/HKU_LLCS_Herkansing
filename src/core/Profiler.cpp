@@ -42,7 +42,7 @@ void Profiler::update(AppLoopData *data) {
     const auto frameStartTime = std::chrono::high_resolution_clock::now();
     ImGui::SFML::Update(*data->window, sf::seconds(data->deltaTime));
 
-    auto t1Start = SecondsSince(frameStartTime);
+    const float t1Start = SecondsSince(frameStartTime);
     cpuTasks.push_back({ t1Start, t1Start, "Update Logic", IM_COL32(255, 100, 100, 255) });
 
     profilerWindow->cpuGraph.LoadFrameData(cpuTasks.data(), cpuTasks.size());

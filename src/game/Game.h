@@ -7,10 +7,15 @@
 #include <vector>
 #include <random>
 #include "../core/GameSystem.h"
-
 #include <SFML/Graphics.hpp>
-
 #include "SpatialHash.h"
+
+#ifndef SPATIALHASH_SIZE
+#define SPATIALHASH_SIZE 32
+#endif
+#ifndef BALL_AMOUNT
+#define BALL_AMOUNT 2500
+#endif
 
 struct Ball;
 
@@ -27,6 +32,7 @@ private:
 
 public:
     Game(const sf::Vector2u& windowSize);
+
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
     std::function<void(AppLoopData*)> registerDrawFunc() override;
     void stop() override;
@@ -34,6 +40,8 @@ public:
     void update(AppLoopData* data);
     void physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime);
     void draw(const AppLoopData* data) const;
+
+    static void checkCollision(const Bucket* bucket, const Bucket* otherBucket);
 };
 
 

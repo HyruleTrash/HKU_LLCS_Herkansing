@@ -6,7 +6,7 @@
 #include <iostream>
 #include "entities/Ball.h"
 
-Game::Game(const sf::Vector2u& windowSize) : spatialHash(SpatialHash(std::make_tuple(32, 32))) {
+Game::Game(const sf::Vector2u& windowSize) : spatialHash(SpatialHash(std::make_tuple(SPATIALHASH_SIZE, SPATIALHASH_SIZE))) {
     gen = std::mt19937(rd());
     posDist = std::uniform_real_distribution(5.0f, 795.0f);
     velDist = std::uniform_real_distribution(-200.0f, 200.0f);
@@ -14,13 +14,13 @@ Game::Game(const sf::Vector2u& windowSize) : spatialHash(SpatialHash(std::make_t
     radiusDist = std::uniform_real_distribution(2.5f, 2.5f);
 
     // Generate random balls
-    for (int i = 0; i < 2500; ++i) {
+    for (int i = 0; i < BALL_AMOUNT; ++i) {
         const sf::Color randomColor(colorDist(gen), colorDist(gen), colorDist(gen));
         const auto ball = new Ball(
-            posDist(gen), posDist(gen), // position
-            radiusDist(gen), // radius
-            randomColor, // color
-            velDist(gen), velDist(gen) // velocity
+            posDist(gen), posDist(gen),     // position
+            radiusDist(gen),                     // radius
+            randomColor,                            // color
+            velDist(gen), velDist(gen)     // velocity
         );
         this->balls.push_back(ball);
         this->spatialHash.moveBallIntoBucket(ball, windowSize);
@@ -53,52 +53,25 @@ void Game::physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime)
     }
 
     // Handle ball-to-ball collisions
-    for (const auto bucket: this->spatialHash.buckets) {
-        for (size_t i = 0; i < bucket->content.size(); ++i) {
-            for (size_t j = i + 1; j < bucket->content.size(); ++j) {
-                const auto ball1 = bucket->content[i];
-                const auto ball2 = bucket->content[j];
+    constexpr std::array<int, 5> neighborOffsets = {
+        0,                      // Current bucket
+        1,                      // Right
+        SPATIALHASH_SIZE - 1,   // Bottom-Left
+        SPATIALHASH_SIZE,       // Bottom
+        SPATIALHASH_SIZE + 1    // Bottom-Right
+    };
+    for (size_t k = 0; k < this->spatialHash.buckets.size(); ++k) {
+        const auto bucket = this->spatialHash.buckets[k];
 
-                const sf::Vector2f pos1 = ball1->getPositionVec2();
-                const sf::Vector2f pos2 = ball2->getPositionVec2();
-                const float radius1 = ball1->getRadius();
-                const float radius2 = ball2->getRadius();
+        for (const int offset : neighborOffsets) {
+            // ReSharper disable once CppTooWideScopeInitStatement
+            const size_t targetIndex = k + offset;
 
-                // Calculate distance between centers
-                const sf::Vector2f delta = pos2 - pos1;
-                const float distance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
-                const float minDistance = radius1 + radius2;
-
-                if (distance < minDistance && distance > 0) {
-                    // Normalize collision vector
-                    const sf::Vector2f normal = delta / distance;
-
-                    // Separate balls to prevent overlap
-                    const float overlap = minDistance - distance;
-                    const sf::Vector2f separation = normal * (overlap * 0.5f);
-                    ball1->updatePosition(pos1 - separation);
-                    ball2->updatePosition(pos2 + separation);
-
-                    // Calculate relative velocity
-                    const sf::Vector2f relativeVel = ball2->velocity - ball1->velocity;
-                    const float velAlongNormal = relativeVel.x * normal.x + relativeVel.y * normal.y;
-
-                    // Don't resolve if velocities are separating
-                    if (velAlongNormal > 0) continue;
-
-                    // Apply collision response (elastic collision)
-                    constexpr float restitution = 0.0f; // Bounce factor (0 = no bounce, 1 = perfect bounce)
-                    const float impulse = -(1 + restitution) * velAlongNormal;
-
-                    // Assume equal mass for simplicity
-                    const sf::Vector2f impulseVector = impulse * normal;
-                    ball1->velocity -= impulseVector;
-                    ball2->velocity += impulseVector;
-                }
-            }
+            if (targetIndex >= this->spatialHash.buckets.size()) continue;
+            const auto otherBucket = this->spatialHash.buckets[targetIndex];
+            checkCollision(&bucket, &otherBucket);
         }
     }
-
 
     // Handle wall collisions
     for (const auto bucket: this->spatialHash.edgeBuckets) {
@@ -128,4 +101,48 @@ void Game::physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime)
 
 void Game::draw(const AppLoopData *data) const {
     for (const auto& ball : balls) ball->draw(data->window);
+}
+
+void Game::checkCollision(const Bucket* bucket, const Bucket* otherBucket) {
+    for (const auto ball1 : bucket->content) {
+        for (const auto ball2 : otherBucket->content) {
+            if (ball1 == ball2) continue;
+
+            const sf::Vector2f pos1 = ball1->getPositionVec2();
+            const sf::Vector2f pos2 = ball2->getPositionVec2();
+            const float radius1 = ball1->getRadius();
+            const float radius2 = ball2->getRadius();
+
+            // Calculate distance between centers
+            const sf::Vector2f delta = pos2 - pos1;
+            const float distance = std::sqrt(delta.x * delta.x + delta.y * delta.y);
+            const float minDistance = radius1 + radius2;
+
+            if (distance >= minDistance || distance <= 0) continue;
+            // Normalize collision vector
+            const sf::Vector2f normal = delta / distance;
+
+            // Separate balls to prevent overlap
+            const float overlap = minDistance - distance;
+            const sf::Vector2f separation = normal * (overlap * 0.5f);
+            ball1->updatePosition(pos1 - separation);
+            ball2->updatePosition(pos2 + separation);
+
+            // Calculate relative velocity
+            const sf::Vector2f relativeVel = ball2->velocity - ball1->velocity;
+            const float velAlongNormal = relativeVel.x * normal.x + relativeVel.y * normal.y;
+
+            // Don't resolve if velocities are separating
+            if (velAlongNormal > 0) continue;
+
+            // Apply collision response (elastic collision)
+            constexpr float restitution = 0.0f; // Bounce factor (0 = no bounce, 1 = perfect bounce)
+            const float impulse = -(1 + restitution) * velAlongNormal;
+
+            // Assume equal mass for simplicity
+            const sf::Vector2f impulseVector = impulse * normal;
+            ball1->velocity -= impulseVector;
+            ball2->velocity += impulseVector;
+        }
+    }
 }

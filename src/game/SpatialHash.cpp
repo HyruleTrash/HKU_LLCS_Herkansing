@@ -20,19 +20,12 @@ SpatialHash::SpatialHash(const std::tuple<int, int>& size) {
     buckets.reserve(static_cast<std::size_t>(cols) * rows);
     for (int x = 0; x < cols; ++x) {
         for (int y = 0; y < rows; ++y) {
-            auto bucket = new Bucket(std::make_tuple(x, y)); //Allocated memory is leaked
-            buckets.push_back(bucket);
-            std::cout << x << " " << y << "\n";
-            if (x == 0 || x == cols -1 || y == 0 || y == rows - 1) edgeBuckets.push_back(bucket);
+            buckets.emplace_back(std::make_tuple(x, y));
+            if (x == 0 || x == cols - 1 || y == 0 || y == rows - 1)
+                edgeBuckets.push_back(&buckets.back());
         }
     }
     std::cout << "\n";
-}
-
-SpatialHash::~SpatialHash() {
-    for (const auto b: buckets) {
-        delete b;
-    }
 }
 
 /**
@@ -71,10 +64,13 @@ void SpatialHash::moveBallIntoBucket(Ball* ball, const sf::Vector2u& windowSize)
 }
 
 Bucket* SpatialHash::findBucket(const std::tuple<int, int>& hash) {
-    for (auto item : this->buckets) if (std::get<0>(item->hash) == std::get<0>(hash) && std::get<1>(item->hash) == std::get<1>(hash)) return item;
+    for (auto& item : this->buckets)
+        if (std::get<0>(item.hash) == std::get<0>(hash) &&
+            std::get<1>(item.hash) == std::get<1>(hash))
+            return &item;
 
-    buckets.push_back(new Bucket(hash)); // this shouldn't be called since buckets are premade on construction
-    return buckets.back();
+    buckets.emplace_back(hash); // this shouldn't be called since buckets are premade on construction
+    return &buckets.back();
 }
 
 std::tuple<int, int> SpatialHash::hash(const float& x, const float& y, const sf::Vector2u& windowSize) const {
