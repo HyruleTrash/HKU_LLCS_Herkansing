@@ -7,10 +7,10 @@ int main()
     auto* app = new Application();
     app->init();
 
-    auto* game = new Game(app->getWindow()->getSize());
-    app->registerSystem(game);
-
     auto* profiler = new Profiler(*app->getWindow());
+    auto* game = new Game(app->getWindow()->getSize(), profiler);
+
+    app->registerSystem(game);
     app->registerSystem(profiler);
 
     app->triggerAppLoop();

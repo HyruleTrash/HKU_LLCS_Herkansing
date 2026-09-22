@@ -7,14 +7,15 @@
 #include <vector>
 #include <random>
 #include "../core/GameSystem.h"
+#include "../core/Profiler.h"
 #include <SFML/Graphics.hpp>
 #include "SpatialHash.h"
 
 #ifndef SPATIALHASH_SIZE
-#define SPATIALHASH_SIZE 32
+#define SPATIALHASH_SIZE 16
 #endif
 #ifndef BALL_AMOUNT
-#define BALL_AMOUNT 2500
+#define BALL_AMOUNT 5000
 #endif
 
 struct Ball;
@@ -29,19 +30,25 @@ private:
     std::uniform_int_distribution<> colorDist;
     std::uniform_real_distribution<float> radiusDist;
     SpatialHash spatialHash;
+    Profiler* profiler;
 
 public:
-    Game(const sf::Vector2u& windowSize);
+    Game(const sf::Vector2u& windowSize, Profiler* profiler);
 
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
     std::function<void(AppLoopData*)> registerDrawFunc() override;
     void stop() override;
 
-    void update(AppLoopData* data);
+    void update(const AppLoopData* data);
+
+
     void physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime);
+    void updatePositions(const sf::Vector2u& windowSize, const float& deltaTime, const std::chrono::system_clock::time_point& frameStartTime);
+    void doBallCollisions(const std::chrono::system_clock::time_point &frameStartTime) const;
+    void doWallCollisions(const sf::Vector2u &windowSize, const std::chrono::system_clock::time_point &frameStartTime) const;
     void draw(const AppLoopData* data) const;
 
-    static void checkCollision(const Bucket* bucket, const Bucket* otherBucket);
+    static void ballToBallBucketToBucketCollision(const Bucket* bucket, const Bucket* otherBucket);
 };
 
 

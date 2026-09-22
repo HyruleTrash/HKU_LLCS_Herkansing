@@ -10,7 +10,6 @@
 class Profiler : public GameSystem {
 private:
     ImGuiUtils::ProfilersWindow* profilerWindow;
-    std::vector<legit::ProfilerTask> cpuTasks;
 
 public:
     Profiler(sf::RenderWindow& window);
@@ -21,6 +20,7 @@ public:
     void update(AppLoopData* data);
     void draw(AppLoopData* data);
 
+    std::vector<legit::ProfilerTask> cpuTasks;
     bool running;
 };
 

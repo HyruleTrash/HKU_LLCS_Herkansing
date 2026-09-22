@@ -6,12 +6,20 @@
 #include <iostream>
 #include "entities/Ball.h"
 
-Game::Game(const sf::Vector2u& windowSize) : spatialHash(SpatialHash(std::make_tuple(SPATIALHASH_SIZE, SPATIALHASH_SIZE))) {
+template <typename Clock, typename Duration>
+float SecondsSince(std::chrono::time_point<Clock, Duration> start)
+{
+    return std::chrono::duration<float>(std::chrono::high_resolution_clock::now() - start).count();
+}
+
+Game::Game(const sf::Vector2u& windowSize, Profiler* profiler) : spatialHash(SpatialHash(std::make_tuple(SPATIALHASH_SIZE, SPATIALHASH_SIZE))) {
     gen = std::mt19937(rd());
     posDist = std::uniform_real_distribution(5.0f, 795.0f);
     velDist = std::uniform_real_distribution(-200.0f, 200.0f);
     colorDist = std::uniform_int_distribution(0, 255);
     radiusDist = std::uniform_real_distribution(2.5f, 2.5f);
+
+    this->profiler = profiler;
 
     // Generate random balls
     for (int i = 0; i < BALL_AMOUNT; ++i) {
@@ -41,18 +49,31 @@ void Game::stop() {
     // nothing to remove
 }
 
-void Game::update(AppLoopData *data) {
+void Game::update(const AppLoopData* data) {
     this->physicsUpdate(data->window->getSize(), data->deltaTime);
 }
 
 void Game::physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime) {
-    // Update positions
+    const auto frameStartTime = std::chrono::high_resolution_clock::now();
+    updatePositions(windowSize, deltaTime, frameStartTime);
+    doBallCollisions(frameStartTime);
+    doWallCollisions(windowSize, frameStartTime);
+}
+
+void Game::updatePositions(const sf::Vector2u& windowSize, const float& deltaTime,
+    const std::chrono::system_clock::time_point& frameStartTime) {
+    const float startTime = SecondsSince(frameStartTime);
     for (const auto& ball : balls) {
         ball->move(ball->velocity * deltaTime);
         spatialHash.moveBallIntoBucket(ball, windowSize);
     }
+    const float endTime = SecondsSince(frameStartTime);
+    this->profiler->cpuTasks.push_back({ startTime, endTime, "Update ball positions", IM_COL32(255, 100, 100, 255) });
 
-    // Handle ball-to-ball collisions
+}
+
+void Game::doBallCollisions(const std::chrono::system_clock::time_point &frameStartTime) const {
+    const float startTime = SecondsSince(frameStartTime);
     constexpr std::array<int, 5> neighborOffsets = {
         0,                      // Current bucket
         1,                      // Right
@@ -69,11 +90,15 @@ void Game::physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime)
 
             if (targetIndex >= this->spatialHash.buckets.size()) continue;
             const auto otherBucket = this->spatialHash.buckets[targetIndex];
-            checkCollision(&bucket, &otherBucket);
+            ballToBallBucketToBucketCollision(&bucket, &otherBucket);
         }
     }
+    const float endTime = SecondsSince(frameStartTime);
+    this->profiler->cpuTasks.push_back({ startTime, endTime, "Update ball-to-ball collisions", IM_COL32(100, 255, 100, 255) });
+}
 
-    // Handle wall collisions
+void Game::doWallCollisions(const sf::Vector2u &windowSize, const std::chrono::system_clock::time_point &frameStartTime) const {
+    const float startTime = SecondsSince(frameStartTime);
     for (const auto bucket: this->spatialHash.edgeBuckets) {
         for (const auto& ball : bucket->content) {
             const sf::Vector2f pos = ball->getPositionVec2();
@@ -97,13 +122,15 @@ void Game::physicsUpdate(const sf::Vector2u& windowSize, const float& deltaTime)
             }
         }
     }
+    const float endTime = SecondsSince(frameStartTime);
+    this->profiler->cpuTasks.push_back({ startTime, endTime, "Update wall collisions", IM_COL32(100, 100, 255, 255) });
 }
 
 void Game::draw(const AppLoopData *data) const {
     for (const auto& ball : balls) ball->draw(data->window);
 }
 
-void Game::checkCollision(const Bucket* bucket, const Bucket* otherBucket) {
+void Game::ballToBallBucketToBucketCollision(const Bucket* bucket, const Bucket* otherBucket) {
     for (const auto ball1 : bucket->content) {
         for (const auto ball2 : otherBucket->content) {
             if (ball1 == ball2) continue;
