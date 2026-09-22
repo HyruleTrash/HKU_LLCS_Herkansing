@@ -12,7 +12,7 @@
 #include "SpatialHash.h"
 
 #ifndef SPATIALHASH_SIZE
-#define SPATIALHASH_SIZE 16
+#define SPATIALHASH_SIZE 32
 #endif
 #ifndef BALL_AMOUNT
 #define BALL_AMOUNT 5000
