@@ -60,6 +60,8 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/core/AppLoopData.h
         src/core/Profiler.cpp
         src/core/Profiler.h
+    include/SafeQueue.h
+    include/ThreadPool.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE
