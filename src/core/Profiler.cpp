@@ -24,6 +24,12 @@ std::function<void(AppLoopData *)> Profiler::registerDrawFunc() {
     return std::bind(&Profiler::draw, this, std::placeholders::_1);
 }
 
+std::function<void(const sf::Event&, AppLoopData*)> Profiler::registerEventFunc() {
+    return [this](const sf::Event& event, const AppLoopData* data) {
+        if (this->running && this->profilerWindow) ImGui::SFML::ProcessEvent(*data->window, event);
+    };
+}
+
 void Profiler::stop() {
     ImGui::SFML::Shutdown();
 }

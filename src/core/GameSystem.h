@@ -21,11 +21,14 @@ public:
      */
     virtual std::function<void(AppLoopData*)> registerUpdateFunc() = 0;
     virtual std::function<void(AppLoopData*)> registerDrawFunc() = 0;
+    virtual std::function<void(const sf::Event&, AppLoopData*)> registerEventFunc(){
+        return nullptr;
+    }
 
     /**
      * @brief closes all needed connected running systems
      */
-    virtual void stop() = 0;
+    virtual void stop() {}
 
 };
 

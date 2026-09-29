@@ -56,13 +56,10 @@ add_executable(${PROJECT_NAME} src/main.cpp
         src/core/Application.h
         src/game/Game.cpp
         src/game/Game.h
-        src/game/entities/Ball.h
         src/core/GameSystem.h
         src/core/AppLoopData.h
         src/core/Profiler.cpp
         src/core/Profiler.h
-        src/game/SpatialHash.cpp
-        src/game/SpatialHash.h
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

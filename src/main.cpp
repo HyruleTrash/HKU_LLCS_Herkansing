@@ -8,7 +8,7 @@ int main()
     app->init();
 
     auto* profiler = new Profiler(*app->getWindow());
-    auto* game = new Game(app->getWindow()->getSize(), profiler);
+    auto* game = new Game(profiler);
 
     app->registerSystem(game);
     app->registerSystem(profiler);

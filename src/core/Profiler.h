@@ -15,6 +15,7 @@ public:
     Profiler(sf::RenderWindow& window);
     std::function<void(AppLoopData*)> registerUpdateFunc() override;
     std::function<void(AppLoopData*)> registerDrawFunc() override;
+    std::function<void(const sf::Event&, AppLoopData*)> registerEventFunc() override;
     void stop() override;
 
     void update(AppLoopData* data);

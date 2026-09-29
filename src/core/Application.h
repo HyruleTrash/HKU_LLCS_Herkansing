@@ -18,6 +18,7 @@ private:
     AppLoopData* appLoopData = nullptr;
     std::vector<std::function<void(AppLoopData*)>> registeredUpdateSystems;
     std::vector<std::function<void(AppLoopData*)>> registeredDrawSystems;
+    std::vector<std::function<void(const sf::Event&, AppLoopData*)>> registeredEventSystems;
     sf::Clock* clock = nullptr;
 
 public:

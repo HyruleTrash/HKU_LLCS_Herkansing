@@ -8,8 +8,9 @@
 
 struct AppLoopData {
 public:
-    sf::RenderWindow *window = nullptr;
+    std::chrono::system_clock::time_point startApplication;
     float deltaTime = 0;
+    sf::RenderWindow* window = nullptr;
     AppLoopData(sf::RenderWindow* window, float deltaTime) {
         this->window = window;
         this->deltaTime = deltaTime;
