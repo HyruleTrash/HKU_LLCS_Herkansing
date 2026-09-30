@@ -40,7 +40,7 @@ private:
     template <typename T> bool hasItemUnsafe(const std::string& key) const {
         const auto type = std::type_index(typeid(T));
 
-        for (auto& item : inventory)
+        for (auto& item : this->inventory)
             if (item.key == key && item.type == type)
                 return true;
 
@@ -62,12 +62,11 @@ public:
      * @tparam T Type of item to be added
      * @param key String for lookup and representation
      * @param value actual item being added, as type less mem-address
-     * @param threadPool pointer to thread pool so that job can be submitted/enqueued
      * @return true if addition succeeded, false if not. will return false if item is already in inventory
      */
     template <typename T>
     std::future<bool> addItem(std::string key, std::shared_ptr<void> value) {
-        return threadPool->submit([key = std::move(key), value = std::move(value), this] {
+        return this->threadPool->submit([key = std::move(key), value = std::move(value), this] {
             std::unique_lock lock(this->mutex);
 
             if (hasItemUnsafe<T>(key)) return false; // if item already exists within inventory, then the addition fails
@@ -76,7 +75,7 @@ public:
             item.key = std::move(key);
             item.value = std::move(value);
             item.type = std::type_index(typeid(T));
-            inventory.push_back(std::move(item));
+            this->inventory.push_back(std::move(item));
 
             // could do another hasItem check here, but being THAT safe seems redundant
             return true;
@@ -88,16 +87,15 @@ public:
      * @brief Gets item from inventory if it exists within the inventory
      * @tparam T Type of item to get
      * @param key String as lookup and representation
-     * @param threadPool pointer to thread pool so that job can be submitted/enqueued
      * @return typeless mem-address or null pointer if it doesn't exist
      */
     template <typename T>
     std::future<std::shared_ptr<void>> getItem(const std::string& key) {
         const auto type = std::type_index(typeid(T));
-        return threadPool->submit([key, this, typeToSearch = std::move(type)] {
+        return this->threadPool->submit([key, this, typeToSearch = std::move(type)] {
             std::shared_lock lock(this->mutex);
 
-            for (const auto& [otherKey, type, value] : inventory)
+            for (const auto& [otherKey, type, value] : this->inventory)
                 if (otherKey == key && type == typeToSearch)
                     return value;
 
@@ -109,19 +107,18 @@ public:
      * @brief Removes item to inventory if it exists within the inventory
      * @tparam T Type of item to remove
      * @param key String as lookup and representation
-     * @param threadPool pointer to thread pool so that job can be submitted/enqueued
      * @return true if removal succeeded, false if not. will return false if item is not within inventory
      */
     template<typename T>
     std::future<bool> removeItem(const std::string& key) {
         const auto type = std::type_index(typeid(T));
-        return threadPool->submit([key, this, type = std::move(type)] {
+        return this->threadPool->submit([key, this, type = std::move(type)] {
             std::unique_lock lock(this->mutex);
 
-            for (int i = 0; i < inventory.size(); ++i) {
-                if (const auto& item = inventory[i]; item.key == key && item.type == type) {
-                    inventory[i] = std::move(inventory.back());
-                    inventory.pop_back();
+            for (int i = 0; i < this->inventory.size(); ++i) {
+                if (const auto& item = this->inventory[i]; item.key == key && item.type == type) {
+                    this->inventory[i] = std::move(this->inventory.back());
+                    this->inventory.pop_back();
                     return true;
                 }
             }
@@ -134,12 +131,11 @@ public:
      * @brief Checks if item is within inventory
      * @tparam T Type of item to check
      * @param key String as lookup and representation
-     * @param threadPool pointer to thread pool so that job can be submitted/enqueued
      * @return true if it exists within inventory, false if not.
      */
     template <typename T>
     std::future<bool> hasItem(const std::string& key) {
-        return threadPool->submit([this, key] {
+        return this->threadPool->submit([this, key] {
             std::shared_lock lock(this->mutex);
             return hasItemUnsafe<T>(key);
         });

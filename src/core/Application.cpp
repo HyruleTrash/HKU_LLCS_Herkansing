@@ -30,27 +30,27 @@ void Application::init() {
  * @brief Triggers the start of the update and render loop
  */
 void Application::triggerAppLoop() const {
-    if (window == nullptr) return;
+    if (this->window == nullptr) return;
 
-    while ( window->isOpen() )
+    while (this->window->isOpen())
     {
         sf::Time elapsed = clock->restart();
         this->appLoopData->deltaTime = elapsed.asSeconds();
 
-        while ( const std::optional event = window->pollEvent() ) {
+        while ( const std::optional event = this->window->pollEvent() ) {
             if ( event->is<sf::Event::Closed>() ) {
                 this->threadPool->shutdown();
                 for (GameSystem* sys : this->registeredSystems) sys->stop();
-                window->close();
+                this->window->close();
                 break;
             }
             for (const auto& func : registeredEventCalls) func(*event, this->appLoopData);
         }
 
-        window->clear();
+        this->window->clear();
         for (const auto& func: registeredUpdateCalls) func(this->appLoopData);
         for (const auto& func: registeredDrawCalls) func(this->appLoopData);
-        window->display();
+        this->window->display();
     }
 }
 
