@@ -3,11 +3,8 @@
 //
 
 #include "Profiler.h"
-
 #include <iostream>
-
 #include "imgui-SFML.h"
-#include <thread>
 
 Profiler::Profiler(sf::RenderWindow &window) {
     this->running = ImGui::SFML::Init(window);
@@ -30,9 +27,7 @@ std::function<void(const sf::Event&, AppLoopData*)> Profiler::registerEventFunc(
     };
 }
 
-void Profiler::stop() {
-    ImGui::SFML::Shutdown();
-}
+void Profiler::stop() { ImGui::SFML::Shutdown(); }
 
 void Profiler::update(AppLoopData* data) {
     if (this->running == false) return;

@@ -29,7 +29,6 @@ public:
      * @brief closes all needed connected running systems
      */
     virtual void stop() {}
-
 };
 
 #endif //COLLISIONCRISISHERKANSING_GAMESYSTEM_H

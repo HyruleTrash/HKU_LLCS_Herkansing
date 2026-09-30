@@ -49,7 +49,7 @@ class ThreadPool {
 
   public:
     ThreadPool(const int n_threads) : m_threads(std::vector<std::thread>(n_threads)), m_shutdown(false) {}
-
+    ~ThreadPool() { shutdown(); }
     ThreadPool(const ThreadPool&) = delete;
     ThreadPool(ThreadPool&&) = delete;
 
@@ -91,4 +91,6 @@ class ThreadPool {
         // Return future from promise
         return task_ptr->get_future();
     }
+
+    [[nodiscard]] size_t getThreadCount() const { return m_threads.size(); }
 };

@@ -8,25 +8,29 @@
 
 #include "AppLoopData.h"
 #include "GameSystem.h"
+#include "ThreadPool.h"
 
 /**
  * @brief Highest level layer, manages the window
  */
 class Application {
 private:
+    std::vector<GameSystem*> registeredSystems;
+    std::vector<std::function<void(AppLoopData*)>> registeredUpdateCalls;
+    std::vector<std::function<void(AppLoopData*)>> registeredDrawCalls;
+    std::vector<std::function<void(const sf::Event&, AppLoopData*)>> registeredEventCalls;
     sf::RenderWindow* window = nullptr;
-    AppLoopData* appLoopData = nullptr;
-    std::vector<std::function<void(AppLoopData*)>> registeredUpdateSystems;
-    std::vector<std::function<void(AppLoopData*)>> registeredDrawSystems;
-    std::vector<std::function<void(const sf::Event&, AppLoopData*)>> registeredEventSystems;
     sf::Clock* clock = nullptr;
+    ThreadPool* threadPool = nullptr;
+    AppLoopData* appLoopData = nullptr;
 
-public:
+  public:
     void init();
     void triggerAppLoop() const;
     void registerSystem(GameSystem* sys);
 
     [[nodiscard]] sf::RenderWindow* getWindow() const;
+    [[nodiscard]] ThreadPool* getThreadPool() const;
 };
 
 #endif //COLLISIONCRISISHERKANSING_SYSTEM_H
