@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 
-set(PROJECT_NAME CollisionCrisisHerkansing)
+set(PROJECT_NAME ThreadingAssignmentRedoLLCS)
 
 project(${PROJECT_NAME} LANGUAGES CXX)
 

@@ -115,7 +115,7 @@ public:
         return this->threadPool->submit([key, this, type = std::move(type)] {
             std::unique_lock lock(this->mutex);
 
-            for (int i = 0; i < this->inventory.size(); ++i) {
+            for (size_t i = 0; i < this->inventory.size(); ++i) {
                 if (const auto& item = this->inventory[i]; item.key == key && item.type == type) {
                     this->inventory[i] = std::move(this->inventory.back());
                     this->inventory.pop_back();
